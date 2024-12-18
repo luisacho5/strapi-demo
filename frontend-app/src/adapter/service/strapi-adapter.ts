@@ -5,7 +5,10 @@ import {z} from "zod";
 import {StrapiError} from "@/adapter/error/strapi-error";
 import {InvalidPayload} from "@/adapter/error/invalid-payload";
 import {LandingPageNotFound} from "@/adapter/error/landing-page-not-found";
+import {LeadInformation} from "@/domain/model/lead-information";
+import {CmsLeadInfo} from "@/adapter/model/cms-lead-info";
 
+export type CmsLeadInfo = z.infer<typeof CmsLeadInfo>
 export type CmsLandingPagesInfo = z.infer<typeof CmsLandingPagesInfo>
 export type StrapiAdapterConfig = {
   strapiURL: string
@@ -31,6 +34,11 @@ export class StrapiAdapter implements ContentManagementService {
     this.#strapiToken = config.strapiToken
   }
 
+  async uploadLead(email: string): Promise<LeadInformation> {
+    const leadInfoCreated = await this.postLeadInfo(email)
+    return new LeadInformation(leadInfoCreated.data.id,leadInfoCreated.data.email)
+  }
+
   async getLandingPage(id: string): Promise<LandingPageInformation> {
     const pages = await this.fetchLandingPages(id)
     const pagesMapped = pages.data.map(page=>
@@ -41,7 +49,6 @@ export class StrapiAdapter implements ContentManagementService {
     }else{
       throw new LandingPageNotFound('no landing pages found')
     }
-
   }
 
   private async fetchLandingPages(id: string): Promise<CmsLandingPagesInfo> {
@@ -61,6 +68,32 @@ export class StrapiAdapter implements ContentManagementService {
     } catch (error) {
       throw new InvalidPayload(
         `landing page parsing failed while fetching from Strapi for id: ${id}, check logged Zod errors object, ${error}`,
+      )
+    }
+  }
+
+  private async postLeadInfo(email:string): Promise<CmsLeadInfo> {
+    const response = await fetch('http://localhost:1337/api/leads', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer ' + this.#strapiToken,
+      },
+      body: JSON.stringify({
+        data: {
+          email: email
+        }
+      }),
+    })
+    if (!response.ok) {
+      throw new StrapiError(`error while adding email : ${email}, response with status code: ${response.status}, error: ${response.text()}`)
+    }
+    try {
+      const parsedResponse = await response.json()
+      return CmsLeadInfo.parse(parsedResponse)
+    } catch (error) {
+      throw new InvalidPayload(
+        `lead info parsing failed while creating from Strapi for email: ${email}, check logged Zod errors object, ${error}`,
       )
     }
   }

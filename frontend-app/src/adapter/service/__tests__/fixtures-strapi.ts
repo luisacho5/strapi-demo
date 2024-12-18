@@ -53,4 +53,14 @@ export const cmsLandingPageInfo= {
     }
   }
 }
-
+export const emailInfo ={
+  data: {
+    id: 4,
+    documentId: "lkub98806waenpsqntfdf0xx",
+    email: "test2@gmail.com",
+    createdAt: "2024-12-18T14:48:43.916Z",
+    updatedAt: "2024-12-18T14:48:43.916Z",
+    publishedAt: "2024-12-18T14:48:43.919Z"
+  },
+  meta: {}
+}
