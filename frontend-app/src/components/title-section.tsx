@@ -1,10 +1,11 @@
 'use client'
 import styled from "styled-components";
 
-const Title = styled.h1`
-  font-size: 36px;
-  text-align: center;
+export const Title = styled.h1`
+  font-size: 2rem;
   color: #000000;
+  text-align: center;
+  padding: 20px 0;
 ;
 `;
 type Props = {
