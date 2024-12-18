@@ -1,4 +1,3 @@
-import {ContentManagementService} from "@/domain/service/content-management-service";
 import {LandingPageInformation} from "@/domain/model/landing-page-information";
 import {CmsLandingPagesInfo} from "@/adapter/model/cms-landing-page-info";
 import {z} from "zod";
@@ -24,78 +23,67 @@ export const getStrapiAdapterConfig = (): StrapiAdapterConfig => {
   }
 }
 
-export class StrapiAdapter implements ContentManagementService {
+export async function uploadLead(email: string,strapiConfig:StrapiAdapterConfig): Promise<LeadInformation> {
+  const leadInfoCreated = await postLeadInfo(email,strapiConfig)
+  return new LeadInformation(leadInfoCreated.data.id, leadInfoCreated.data.email)
+}
 
-  readonly #strapiURL: string
-  readonly #strapiToken: string
+export async function getLandingPage(id: string,strapiConfig:StrapiAdapterConfig): Promise<LandingPageInformation> {
+  const pages = await fetchLandingPages(id,strapiConfig)
+  const pagesMapped = pages.data.map(page =>
+    new LandingPageInformation(page.title, page.description, strapiConfig.strapiURL + page.image.url)
+  )
+  if (pagesMapped.length > 0) {
+    return pagesMapped[0]
+  } else {
+    throw new LandingPageNotFound('no landing pages found')
+  }
+}
 
-  constructor(config: StrapiAdapterConfig) {
-    this.#strapiURL = config.strapiURL
-    this.#strapiToken = config.strapiToken
+async function fetchLandingPages(id: string,strapiConfig:StrapiAdapterConfig): Promise<CmsLandingPagesInfo> {
+
+  const response = await fetch(`${strapiConfig.strapiURL}/api/pages?filters[id][$eq]=${id}&populate=*`, {
+    headers: {
+      Authorization: 'Bearer ' + strapiConfig.strapiToken,
+    },
+  })
+
+  if (!response.ok) {
+    throw new StrapiError(`error while retrieving landing page info for id: ${id}, response with status code: ${response.status}, error: ${response.text()}`)
   }
 
-  async uploadLead(email: string): Promise<LeadInformation> {
-    const leadInfoCreated = await this.postLeadInfo(email)
-    return new LeadInformation(leadInfoCreated.data.id,leadInfoCreated.data.email)
-  }
-
-  async getLandingPage(id: string): Promise<LandingPageInformation> {
-    const pages = await this.fetchLandingPages(id)
-    const pagesMapped = pages.data.map(page=>
-      new LandingPageInformation(page.title,page.description, this.#strapiURL+page.image.url)
+  try {
+    const parsedResponse = await response.json()
+    return CmsLandingPagesInfo.parse(parsedResponse)
+  } catch (error) {
+    throw new InvalidPayload(
+      `landing page parsing failed while fetching from Strapi for id: ${id}, check logged Zod errors object, ${error}`,
     )
-    if (pagesMapped.length > 0) {
-      return pagesMapped[0]
-    }else{
-      throw new LandingPageNotFound('no landing pages found')
-    }
   }
+}
 
-  private async fetchLandingPages(id: string): Promise<CmsLandingPagesInfo> {
-    const response = await fetch(`${this.#strapiURL}/api/pages?filters[id][$eq]=${id}&populate=*`, {
-      headers: {
-        Authorization: 'Bearer ' + this.#strapiToken,
-      },
-    })
-
-    if (!response.ok) {
-      throw new StrapiError(`error while retrieving landing page info for id: ${id}, response with status code: ${response.status}, error: ${response.text()}`)
-    }
-
-    try {
-      const parsedResponse = await response.json()
-      return CmsLandingPagesInfo.parse(parsedResponse)
-    } catch (error) {
-      throw new InvalidPayload(
-        `landing page parsing failed while fetching from Strapi for id: ${id}, check logged Zod errors object, ${error}`,
-      )
-    }
+async function postLeadInfo(email: string,strapiConfig:StrapiAdapterConfig): Promise<CmsLeadInfo> {
+  const response = await fetch(`${strapiConfig.strapiURL}/api/leads`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: 'Bearer ' + strapiConfig.strapiToken,
+    },
+    body: JSON.stringify({
+      data: {
+        email: email
+      }
+    }),
+  })
+  if (!response.ok) {
+    throw new StrapiError(`error while adding email : ${email}, response with status code: ${response.status}, error: ${response.text()}`)
   }
-
-  private async postLeadInfo(email:string): Promise<CmsLeadInfo> {
-    const response = await fetch('http://localhost:1337/api/leads', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: 'Bearer ' + this.#strapiToken,
-      },
-      body: JSON.stringify({
-        data: {
-          email: email
-        }
-      }),
-    })
-    if (!response.ok) {
-      throw new StrapiError(`error while adding email : ${email}, response with status code: ${response.status}, error: ${response.text()}`)
-    }
-    try {
-      const parsedResponse = await response.json()
-      return CmsLeadInfo.parse(parsedResponse)
-    } catch (error) {
-      throw new InvalidPayload(
-        `lead info parsing failed while creating from Strapi for email: ${email}, check logged Zod errors object, ${error}`,
-      )
-    }
+  try {
+    const parsedResponse = await response.json()
+    return CmsLeadInfo.parse(parsedResponse)
+  } catch (error) {
+    throw new InvalidPayload(
+      `lead info parsing failed while creating from Strapi for email: ${email}, check logged Zod errors object, ${error}`,
+    )
   }
-
 }

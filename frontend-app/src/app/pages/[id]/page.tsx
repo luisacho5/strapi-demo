@@ -1,4 +1,4 @@
-import {getStrapiAdapterConfig, StrapiAdapter} from "@/adapter/service/strapi-adapter"
+import {getLandingPage, getStrapiAdapterConfig} from "@/adapter/service/strapi-adapter"
 import {LandingPageInformation} from "@/domain/model/landing-page-information"
 import {TitleSection} from "@/components/title-section"
 import {FormSection} from "@/components/form-section";
@@ -12,11 +12,12 @@ interface Props {
 }
 
 export default async function LandingPage(props: Props) {
-  const strapiAdapter = new StrapiAdapter(getStrapiAdapterConfig())
   const {id} = props.params
+  const strapiAdapterConfig = getStrapiAdapterConfig()
+
   let landingPageInformation: LandingPageInformation | undefined
   try {
-    landingPageInformation = await strapiAdapter.getLandingPage(id)
+    landingPageInformation = await getLandingPage(id,strapiAdapterConfig)
   } catch (e) {
     console.log(e)
   }
@@ -24,8 +25,7 @@ export default async function LandingPage(props: Props) {
     <>
       {landingPageInformation &&
           <div>
-              <TitleSection title={landingPageInformation.title}>
-              </TitleSection>
+              <TitleSection title={landingPageInformation.title}/>
               <HeroImage
                   src={landingPageInformation.imageUrl}
                   alt="landig-page-image"
@@ -35,7 +35,7 @@ export default async function LandingPage(props: Props) {
               <Description>
                 {landingPageInformation.description}
               </Description>
-              <FormSection/>
+              <FormSection strapiConfig={strapiAdapterConfig}/>
           </div>
       }
     </>);
