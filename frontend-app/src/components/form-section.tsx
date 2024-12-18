@@ -1,6 +1,8 @@
 'use client'
 
 import styled from "styled-components";
+import {StrapiAdapterConfig, uploadLead} from "@/adapter/service/strapi-adapter";
+import {ChangeEvent, useState} from "react";
 
 const FormWrapper = styled.form`
     display: flex;
@@ -38,11 +40,29 @@ const SubmitButton = styled.button`
         background-color: #444;
     }
 `;
+type Props = {
+  strapiConfig: StrapiAdapterConfig
+}
+export const FormSection: React.FC<Props> = ({strapiConfig}) => {
+  const [email, setEmail] = useState('')
 
+  const onSubmit = async () => {
+    try {
+      await uploadLead(email, strapiConfig)
+    }catch(e){
+      console.error(e)
+    }
+  }
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setEmail(e.target.value)
+  }
 
-export const FormSection: React.FC = ({}) => {
-  return (<FormWrapper>
-    <InputField type="email" placeholder="Email"/>
+  return (<FormWrapper onSubmit={onSubmit}>
+    <InputField
+      type="email" placeholder="Email"
+      value={email}
+      onChange={handleChange}
+      required/>
     <SubmitButton type="submit">Submit</SubmitButton>
   </FormWrapper>)
 }

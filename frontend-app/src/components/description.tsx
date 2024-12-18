@@ -3,8 +3,9 @@ import styled from "styled-components";
 
 export const Description = styled.p`
     padding: 20px;
-    font-size: 0.9rem;
-    color: #444;
+    font-size: 12px;
+    font-weight: 400;
+    color: #000000;
     text-align: justify;
 ;
 `;
