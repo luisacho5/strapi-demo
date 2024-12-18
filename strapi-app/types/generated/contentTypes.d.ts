@@ -369,12 +369,12 @@ export interface AdminUser extends Struct.CollectionTypeSchema {
   };
 }
 
-export interface ApiEmailEmail extends Struct.CollectionTypeSchema {
-  collectionName: 'emails';
+export interface ApiLeadLead extends Struct.CollectionTypeSchema {
+  collectionName: 'leads';
   info: {
-    displayName: 'email';
-    pluralName: 'emails';
-    singularName: 'email';
+    displayName: 'Lead';
+    pluralName: 'leads';
+    singularName: 'lead';
   };
   options: {
     draftAndPublish: true;
@@ -385,7 +385,7 @@ export interface ApiEmailEmail extends Struct.CollectionTypeSchema {
       Schema.Attribute.Private;
     email: Schema.Attribute.Email;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
-    localizations: Schema.Attribute.Relation<'oneToMany', 'api::email.email'> &
+    localizations: Schema.Attribute.Relation<'oneToMany', 'api::lead.lead'> &
       Schema.Attribute.Private;
     publishedAt: Schema.Attribute.DateTime;
     updatedAt: Schema.Attribute.DateTime;
@@ -931,7 +931,7 @@ declare module '@strapi/strapi' {
       'admin::transfer-token': AdminTransferToken;
       'admin::transfer-token-permission': AdminTransferTokenPermission;
       'admin::user': AdminUser;
-      'api::email.email': ApiEmailEmail;
+      'api::lead.lead': ApiLeadLead;
       'api::page.page': ApiPagePage;
       'plugin::content-releases.release': PluginContentReleasesRelease;
       'plugin::content-releases.release-action': PluginContentReleasesReleaseAction;

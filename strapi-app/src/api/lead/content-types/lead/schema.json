@@ -1,10 +1,10 @@
 {
   "kind": "collectionType",
-  "collectionName": "emails",
+  "collectionName": "leads",
   "info": {
-    "singularName": "email",
-    "pluralName": "emails",
-    "displayName": "email"
+    "singularName": "lead",
+    "pluralName": "leads",
+    "displayName": "Lead"
   },
   "options": {
     "draftAndPublish": true
