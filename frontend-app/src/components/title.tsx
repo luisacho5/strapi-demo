@@ -9,9 +9,3 @@ export const Title = styled.h1`
   font-weight:400;
 ;
 `;
-type Props = {
-  title:string
-}
-export const TitleSection: React.FC<Props> = ({ title }) => {
-  return (<Title>{title}</Title>)
-}

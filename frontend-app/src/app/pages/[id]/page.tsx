@@ -1,6 +1,6 @@
 import {getLandingPage, getStrapiAdapterConfig} from "@/adapter/service/strapi-adapter"
 import {LandingPageInformation} from "@/domain/model/landing-page-information"
-import {TitleSection} from "@/components/title-section"
+import {Title} from "@/components/title"
 import {FormSection} from "@/components/form-section";
 import {Description} from "@/components/description";
 import {HeroImage} from "@/components/hero-image";
@@ -25,7 +25,9 @@ export default async function LandingPage(props: Props) {
     <>
       {landingPageInformation &&
           <div>
-              <TitleSection title={landingPageInformation.title}/>
+              <Title>
+                  {landingPageInformation.title}
+              </Title>
               <HeroImage
                   src={landingPageInformation.imageUrl}
                   alt="landig-page-image"
