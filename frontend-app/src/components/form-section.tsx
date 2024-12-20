@@ -54,9 +54,12 @@ type Props = {
 export const FormSection: React.FC<Props> = ({strapiConfig}) => {
   const [email, setEmail] = useState('')
 
-  const onSubmit = async () => {
+  const onSubmit = async (e:React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
     try {
       await uploadLead(email, strapiConfig)
+      setEmail('')
+      console.log('EMAIL SENT TO STRAPI: ',email)
     }catch(e){
       console.error(e)
     }
